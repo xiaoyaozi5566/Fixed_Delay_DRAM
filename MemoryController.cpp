@@ -779,19 +779,19 @@ void MemoryController::update()
 							delete pendingReadTransactions[i];
 							pendingReadTransactions.erase(pendingReadTransactions.begin()+i);
 							foundMatch=true; 
+							delete returnTransaction[j];
+							returnTransaction.erase(returnTransaction.begin()+j);
 							break;
 						}
+					}
+					if (!foundMatch)
+					{
+						ERROR("Can't find a matching transaction for 0x"<<hex<<returnTransaction[j]->address<<dec);
+						abort(); 
 					}
 					break;
 				}
 			}
-			if (!foundMatch)
-			{
-				ERROR("Can't find a matching transaction for 0x"<<hex<<returnTransaction[0]->address<<dec);
-				abort(); 
-			}
-			delete returnTransaction[j];
-			returnTransaction.erase(returnTransaction.begin()+j);
 		}
 	}
 	else

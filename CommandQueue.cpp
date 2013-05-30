@@ -338,7 +338,7 @@ bool CommandQueue::pop(BusPacket **busPacket)
 									*busPacket = queue[i];
 									next_busPacket = queue[i+1];
 									queue.erase(queue.begin()+i);
-									queue.erase(queue.begin()+i+1);
+									queue.erase(queue.begin()+i);
 									foundIssuable = true;
 									prev_ACTIVATE = true;
 									break;
