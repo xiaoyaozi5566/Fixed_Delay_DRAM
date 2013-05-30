@@ -1,1 +1,3 @@
-./DRAMSim -s system.ini -d ini/DDR3_micron_64M_8B_x4_sg15.ini -t traces/mase_art_MT.trc -S 8192 -c 10000 -n -o QUEUING_STRUCTURE=per_rank_per_thread,SCHEDULING_POLICY=rank_then_bank_round_robin,ROW_BUFFER_POLICY=close_page -q
+./DRAMSim -s system.ini -d ini/DDR3_micron_64M_8B_x4_sg15.ini -t traces/mase_art_MT_LOW.trc -S 8192 -c 10000 -n -o QUEUING_STRUCTURE=per_rank_per_thread,SCHEDULING_POLICY=rank_then_bank_round_robin,ROW_BUFFER_POLICY=close_page -q
+./DRAMSim -s system.ini -d ini/DDR3_micron_64M_8B_x4_sg15.ini -t traces/mase_art_MT_MEDIUM.trc -S 8192 -c 10000 -n -o QUEUING_STRUCTURE=per_rank_per_thread,SCHEDULING_POLICY=rank_then_bank_round_robin,ROW_BUFFER_POLICY=close_page -q
+./DRAMSim -s system.ini -d ini/DDR3_micron_64M_8B_x4_sg15.ini -t traces/mase_art_MT_HIGH.trc -S 8192 -c 10000 -n -o QUEUING_STRUCTURE=per_rank_per_thread,SCHEDULING_POLICY=rank_then_bank_round_robin,ROW_BUFFER_POLICY=close_page -q

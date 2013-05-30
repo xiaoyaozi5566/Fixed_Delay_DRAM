@@ -775,6 +775,8 @@ void MemoryController::update()
 							insertHistogram(currentClockCycle-pendingReadTransactions[i]->timeAdded,rank,bank);
 							//return latency
 							returnReadData(pendingReadTransactions[i]);
+							if (returnTransaction[j]->threadID == 0)
+								PRINTN("Address: " << returnTransaction[j]->address << "  Return time: " << currentClockCycle << '\n');
 
 							delete pendingReadTransactions[i];
 							pendingReadTransactions.erase(pendingReadTransactions.begin()+i);
