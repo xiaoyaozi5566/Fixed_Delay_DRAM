@@ -60,15 +60,18 @@ extern float Vdd;
 
 using namespace DRAMSim;
 
-MemoryController::MemoryController(MemorySystem *parent, CSVWriter &csvOut_, ostream &dramsim_log_) :
+MemoryController::MemoryController(MemorySystem *parent, CSVWriter &csvOut_, ostream &dramsim_log_, const string &outputFilename_) :
 		dramsim_log(dramsim_log_),
 		bankStates(NUM_RANKS, vector<BankState>(NUM_BANKS, dramsim_log)),
 		commandQueue(bankStates, dramsim_log_),
 		poppedBusPacket(NULL),
 		csvOut(csvOut_),
 		totalTransactions(0),
-		refreshRank(0)
+		refreshRank(0),
+		outputFilename(outputFilename_)
 {
+	outputFile.open(outputFilename.c_str());
+	//cout << outputFilename << endl;
 	//get handle on parent
 	parentMemorySystem = parent;
 
@@ -130,7 +133,7 @@ void MemoryController::receiveFromBus(BusPacket *bpacket)
 	}
 
 	//add to return read data queue
-	returnTransaction.push_back(new Transaction(RETURN_DATA, bpacket->physicalAddress, bpacket->data, bpacket->threadID));
+	returnTransaction.push_back(new Transaction(RETURN_DATA, bpacket->physicalAddress, bpacket->data, bpacket->threadID, bpacket->returnTime));
 	totalReadsPerBank[SEQUENTIAL(bpacket->rank,bpacket->bank)]++;
 
 	// this delete statement saves a mindboggling amount of memory
@@ -757,7 +760,8 @@ void MemoryController::update()
 			//find the pending read transaction to calculate latency
 			for (j=0;j<returnTransaction.size();j++)
 			{
-				unsigned returnTime = (returnTransaction[j]->index*NUM_PIDS + returnTransaction[j]->threadID + 1)*WORST_CASE_DELAY;
+				unsigned returnTime = returnTransaction[j]->returnTime;
+				// throw some exception when returntime < currentClockcycle
 				if (returnTime > currentClockCycle) continue;
 				else
 				{
@@ -776,7 +780,7 @@ void MemoryController::update()
 							//return latency
 							returnReadData(pendingReadTransactions[i]);
 							if (returnTransaction[j]->threadID == 0)
-								PRINTN("Address: " << returnTransaction[j]->address << "  Return time: " << currentClockCycle << '\n');
+								outputFile << "Address: " << hex << returnTransaction[j]->address << "  Return time: " << dec << currentClockCycle << '\n';
 
 							delete pendingReadTransactions[i];
 							pendingReadTransactions.erase(pendingReadTransactions.begin()+i);
@@ -1128,6 +1132,7 @@ MemoryController::~MemoryController()
 	{
 		delete returnTransaction[i];
 	}
+	outputFile.close();
 
 }
 //inserts a latency into the latency histogram

@@ -79,6 +79,9 @@ public:
 	
 	BusPacket3D queues; // 3D array of BusPacket pointers
 	vector< vector<BankState> > &bankStates;
+	
+	unsigned refreshCounter;
+	
 private:
 	void nextRankAndBank(unsigned &rank, unsigned &bank);
 	//fields

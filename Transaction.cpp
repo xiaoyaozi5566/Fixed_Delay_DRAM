@@ -43,12 +43,13 @@ using std::dec;
 
 namespace DRAMSim {
 
-Transaction::Transaction(TransactionType transType, uint64_t addr, void *dat, uint64_t pid) :
+Transaction::Transaction(TransactionType transType, uint64_t addr, void *dat, uint64_t pid, uint64_t rTime) :
 	transactionType(transType),
 	address(addr),
 	data(dat),
 	threadID(pid),
-	index(0)
+	index(0),
+	returnTime(rTime)
 {}
 
 Transaction::Transaction(const Transaction &t)

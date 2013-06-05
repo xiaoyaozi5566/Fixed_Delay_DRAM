@@ -57,7 +57,8 @@ CommandQueue::CommandQueue(vector< vector<BankState> > &states, ostream &dramsim
 		refreshRank(0),
 		refreshWaiting(false),
 		prev_ACTIVATE(false),
-		sendAct(true)
+		sendAct(true),
+		refreshCounter(0)
 {
 	//set here to avoid compile errors
 	currentClockCycle = 0;
@@ -228,20 +229,17 @@ bool CommandQueue::pop(BusPacket **busPacket)
 						for (size_t p=0;p<NUM_PIDS;p++)
 						{
 							vector<BusPacket *> &queue = getCommandQueue(refreshRank, p);
-							for (size_t j=0;j<queue.size();j++)
+							BusPacket *packet = queue[0];
+							if (packet->row == bankStates[refreshRank][b].openRowAddress &&
+									packet->bank == b)
 							{
-								BusPacket *packet = queue[j];
-								if (packet->row == bankStates[refreshRank][b].openRowAddress &&
-										packet->bank == b)
+								if (packet->busPacketType != ACTIVATE && isIssuable(packet))
 								{
-									if (packet->busPacketType != ACTIVATE && isIssuable(packet))
-									{
-										*busPacket = packet;
-										queue.erase(queue.begin() + j);
-										sendingREF = true;
-									}
-									break;
+									*busPacket = packet;
+									queue.erase(queue.begin());
+									sendingREF = true;
 								}
+								break;
 							}
 						}
 						break;
@@ -302,6 +300,7 @@ bool CommandQueue::pop(BusPacket **busPacket)
 				refreshRank = -1;
 				refreshWaiting = false;
 				sendingREF = true;
+				refreshCounter++;
 			}
 		} // refreshWaiting
 
@@ -311,7 +310,8 @@ bool CommandQueue::pop(BusPacket **busPacket)
 			bool foundIssuable = false;
 			unsigned startingRank = nextRank;
 			unsigned startingBank = nextBank;
-			unsigned worstStartTime = (threadCounters[nextThread]*NUM_PIDS + nextThread)*WORST_CASE_DELAY;
+			unsigned worstStartTime = (threadCounters[nextThread]*NUM_PIDS + nextThread)*WORST_CASE_DELAY + tRFC*refreshCounter;
+			//PRINTN(currentClockCycle << " Worst: " << worstStartTime << " Thread: " << nextThread << endl);
 			if (queuingStructure == PerRankPerThread)
 			{				
 				if (prev_ACTIVATE)
@@ -320,52 +320,58 @@ bool CommandQueue::pop(BusPacket **busPacket)
 					{
 						*busPacket = next_busPacket;
 						(*busPacket)->index = threadCounters[nextThread];
+						(*busPacket)->returnTime = worstStartTime + WORST_CASE_DELAY;
 						foundIssuable = true;
 						prev_ACTIVATE = false;
 					}
 				}
 				else
 				{
-					for (size_t r=0;r<NUM_RANKS;r++)
+					if(currentClockCycle == worstStartTime)
 					{
-						vector<BusPacket *> &queue = getCommandQueue(r, nextThread);
-						if (!queue.empty() && !((nextRank == refreshRank) && refreshWaiting))
+						for (size_t r=0;r<NUM_RANKS;r++)
 						{
-							for (size_t i=0;i<queue.size();i++)
+							vector<BusPacket *> &queue = getCommandQueue(r, nextThread);
+							if (!queue.empty() && !((r == refreshRank) && refreshWaiting))
 							{
-								if (isIssuable(queue[i]) && queue[i]->busPacketType == ACTIVATE)
-								{							
-									*busPacket = queue[i];
-									next_busPacket = queue[i+1];
-									queue.erase(queue.begin()+i);
-									queue.erase(queue.begin()+i);
-									foundIssuable = true;
-									prev_ACTIVATE = true;
-									break;
+								for (size_t i=0;i<queue.size();i++)
+								{
+									if (isIssuable(queue[i]) && queue[i]->busPacketType == ACTIVATE)
+									{							
+										*busPacket = queue[i];
+										next_busPacket = queue[i+1];
+										queue.erase(queue.begin()+i);
+										queue.erase(queue.begin()+i);
+										foundIssuable = true;
+										prev_ACTIVATE = true;
+										//PRINTN("Address: " << hex << queue[i]->physicalAddress << "  Time: " << dec << currentClockCycle << '\n');
+										break;
+									}
 								}
 							}
+							if (foundIssuable) break;
 						}
-						if (foundIssuable) break;
 					}
 				}
 				if (!foundIssuable && (currentClockCycle < worstStartTime)) return false;
 				// can't find issuable command even after the worst case time (possibly empty command queue)
-				else if (!foundIssuable)
+				else if (!foundIssuable && (currentClockCycle == worstStartTime))
 				{
 					threadCounters[nextThread]++;
 					nextThread = (nextThread+1)%NUM_PIDS;
 					return false;
 				}				
-				else
+				else if (foundIssuable)
 				{
-					if((*busPacket)->busPacketType==ACTIVATE)
+					if((*busPacket)->busPacketType!=ACTIVATE)
 					{
 						threadCounters[nextThread]++;
-					}
-					else
-					{
 						nextThread = (nextThread+1)%NUM_PIDS;
 					}
+				}
+				else
+				{
+					return false;
 				}
 			}
 			else

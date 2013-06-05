@@ -55,7 +55,7 @@ class MemorySystem : public SimulatorObject
 	ostream &dramsim_log;
 public:
 	//functions
-	MemorySystem(unsigned id, unsigned megsOfMemory, CSVWriter &csvOut_, ostream &dramsim_log_);
+	MemorySystem(unsigned id, unsigned megsOfMemory, CSVWriter &csvOut_, ostream &dramsim_log_, const string &outputFilename_);
 	virtual ~MemorySystem();
 	void update();
 	bool addTransaction(Transaction *trans);
@@ -82,6 +82,7 @@ public:
 
 private:
 	CSVWriter &csvOut;
+	string outputFilename;
 };
 }
 

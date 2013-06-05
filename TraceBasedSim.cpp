@@ -384,6 +384,7 @@ int main(int argc, char **argv)
 	string deviceIniFilename;
 	string pwdString;
 	string *visFilename = NULL;
+	string outputFilename;
 	unsigned megsOfMemory=2048;
 	bool useClockCycle=true;
 	
@@ -406,10 +407,11 @@ int main(int argc, char **argv)
 			{"help", no_argument, 0, 'h'},
 			{"size", required_argument, 0, 'S'},
 			{"visfile", required_argument, 0, 'v'},
+			{"result", required_argument, 0, 'r'},
 			{0, 0, 0, 0}
 		};
 		int option_index=0; //for getopt
-		c = getopt_long (argc, argv, "t:s:c:d:o:p:S:v:qn", long_options, &option_index);
+		c = getopt_long (argc, argv, "t:s:r:c:d:o:p:S:v:qn", long_options, &option_index);
 		if (c == -1)
 		{
 			break;
@@ -463,6 +465,9 @@ int main(int argc, char **argv)
 		case 'v':
 			visFilename = new string(optarg);
 			break;
+		case 'r':
+			outputFilename = string(optarg);
+			break;
 		case '?':
 			usage();
 			exit(-1);
@@ -515,7 +520,7 @@ int main(int argc, char **argv)
 	string line;
 
 
-	MultiChannelMemorySystem *memorySystem = new MultiChannelMemorySystem(deviceIniFilename, systemIniFilename, pwdString, traceFileName, megsOfMemory, visFilename, paramOverrides);
+	MultiChannelMemorySystem *memorySystem = new MultiChannelMemorySystem(deviceIniFilename, systemIniFilename, pwdString, traceFileName, megsOfMemory, outputFilename, visFilename, paramOverrides);
 	// set the frequency ratio to 1:1
 	memorySystem->setCPUClockSpeed(0); 
 	std::ostream &dramsim_logfile = memorySystem->getLogFile(); 
@@ -561,7 +566,7 @@ int main(int argc, char **argv)
 				if (line.size() > 0)
 				{
 					data = parseTraceFileLine(line, addr, transType,clockCycle, pid, traceType,useClockCycle);
-					trans = new Transaction(transType, addr, data, pid);
+					trans = new Transaction(transType, addr, data, pid, 0);
 					alignTransactionAddress(*trans); 
 
 					if (i>=clockCycle)

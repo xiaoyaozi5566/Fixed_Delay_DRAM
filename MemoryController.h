@@ -59,7 +59,7 @@ class MemoryController : public SimulatorObject
 
 public:
 	//functions
-	MemoryController(MemorySystem* ms, CSVWriter &csvOut_, ostream &dramsim_log_);
+	MemoryController(MemorySystem* ms, CSVWriter &csvOut_, ostream &dramsim_log_, const string &outputFilename_);
 	virtual ~MemoryController();
 
 	bool addTransaction(Transaction *trans);
@@ -127,6 +127,8 @@ private:
 
 
 	unsigned refreshRank;
+	string outputFilename;
+	ofstream outputFile;
 	
 public:
 	// energy values are per rank -- SST uses these directly, so make these public 

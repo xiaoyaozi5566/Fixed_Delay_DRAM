@@ -66,6 +66,7 @@ public:
 	void *data;
 	unsigned threadID;
 	unsigned index;
+	unsigned returnTime;
 
 	//Functions
 	BusPacket(BusPacketType packtype, uint64_t physicalAddr, unsigned col, unsigned rw, unsigned r, unsigned b, void *dat, ostream &dramsim_log_);

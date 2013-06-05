@@ -61,11 +61,12 @@ public:
 	uint64_t timeReturned;
 	uint64_t threadID;
 	uint64_t index;
+	uint64_t returnTime;
 
 
 	friend ostream &operator<<(ostream &os, const Transaction &t);
 	//functions
-	Transaction(TransactionType transType, uint64_t addr, void *data, uint64_t pid);
+	Transaction(TransactionType transType, uint64_t addr, void *data, uint64_t pid, uint64_t rTime);
 	Transaction(const Transaction &t);
 
 	BusPacketType getBusPacketType()

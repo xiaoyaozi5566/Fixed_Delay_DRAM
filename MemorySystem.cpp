@@ -52,12 +52,13 @@ namespace DRAMSim {
 
 powerCallBack_t MemorySystem::ReportPower = NULL;
 
-MemorySystem::MemorySystem(unsigned id, unsigned int megsOfMemory, CSVWriter &csvOut_, ostream &dramsim_log_) :
+MemorySystem::MemorySystem(unsigned id, unsigned int megsOfMemory, CSVWriter &csvOut_, ostream &dramsim_log_, const string &outputFilename_) :
 		dramsim_log(dramsim_log_),
 		ReturnReadData(NULL),
 		WriteDataDone(NULL),
 		systemID(id),
-		csvOut(csvOut_)
+		csvOut(csvOut_),
+		outputFilename(outputFilename_)
 {
 	currentClockCycle = 0;
 
@@ -128,7 +129,7 @@ MemorySystem::MemorySystem(unsigned id, unsigned int megsOfMemory, CSVWriter &cs
 	DEBUG("CH. " <<systemID<<" TOTAL_STORAGE : "<< TOTAL_STORAGE << "MB | "<<NUM_RANKS<<" Ranks | "<< NUM_DEVICES <<" Devices per rank");
 
 
-	memoryController = new MemoryController(this, csvOut, dramsim_log);
+	memoryController = new MemoryController(this, csvOut, dramsim_log, outputFilename);
 
 	// TODO: change to other vector constructor?
 	ranks = new vector<Rank *>();
@@ -177,7 +178,7 @@ bool MemorySystem::WillAcceptTransaction()
 bool MemorySystem::addTransaction(bool isWrite, uint64_t addr)
 {
 	TransactionType type = isWrite ? DATA_WRITE : DATA_READ;
-	Transaction *trans = new Transaction(type,addr,NULL, 0);
+	Transaction *trans = new Transaction(type,addr,NULL, 0, 0);
 	// push_back in memoryController will make a copy of this during
 	// addTransaction so it's kosher for the reference to be local 
 
