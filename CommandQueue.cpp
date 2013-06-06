@@ -297,6 +297,7 @@ bool CommandQueue::pop(BusPacket **busPacket)
 			if (!foundActiveOrTooEarly && bankStates[refreshRank][0].currentBankState != PowerDown)
 			{
 				*busPacket = new BusPacket(REFRESH, 0, 0, 0, refreshRank, 0, 0, dramsim_log);
+				PRINTN("Refresh at " << currentClockCycle << " for rank " << refreshRank << endl);
 				refreshRank = -1;
 				refreshWaiting = false;
 				sendingREF = true;
@@ -312,6 +313,7 @@ bool CommandQueue::pop(BusPacket **busPacket)
 			unsigned startingBank = nextBank;
 			unsigned worstStartTime = (threadCounters[nextThread]*NUM_PIDS + nextThread)*WORST_CASE_DELAY + tRFC*refreshCounter;
 			//PRINTN(currentClockCycle << " Worst: " << worstStartTime << " Thread: " << nextThread << endl);
+			//PRINTN("Cycle: " << currentClockCycle << " bank[1][7]: " << bankStates[1][7].currentBankState << " nextActivate: " << bankStates[1][7].nextActivate << endl);
 			if (queuingStructure == PerRankPerThread)
 			{				
 				if (prev_ACTIVATE)
@@ -348,6 +350,10 @@ bool CommandQueue::pop(BusPacket **busPacket)
 										break;
 									}
 								}
+							}
+							else if (!queue.empty())
+							{
+								break;
 							}
 							if (foundIssuable) break;
 						}

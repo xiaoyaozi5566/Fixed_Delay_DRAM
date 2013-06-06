@@ -612,6 +612,7 @@ int main(int argc, char **argv)
 #endif
 				trans=NULL;
 			}
+			//PRINTN("Stall transaction " << hex << addr << " enqueue at " << dec << i << endl);
 		}
 
 		(*memorySystem).update();

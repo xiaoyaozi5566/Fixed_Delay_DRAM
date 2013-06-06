@@ -20,6 +20,8 @@ for i, j in ij_grid:
 	  if line != lineB:
 	    print "Unmatch found for file" + filenames[i] + " and " + filenames[j] + " at line " + line + "\n"
 	    flag = 1
+  fileA.close()
+  fileB.close()
 
 if flag == 0:
   print "Results are the same!"

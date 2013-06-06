@@ -527,6 +527,7 @@ void MemoryController::update()
 						PRINT("  Row  : " << newTransactionRow);
 						PRINT("  Col  : " << newTransactionColumn);
 					}
+					//PRINT("ID: " << i << " Request " << hex << transaction->address << " enqueue at " << dec << currentClockCycle);
 
 
 
@@ -776,6 +777,7 @@ void MemoryController::update()
 							//	}
 							unsigned chan,rank,bank,row,col;
 							addressMapping(returnTransaction[j]->address,chan,rank,bank,row,col);
+							//PRINTN("ID: " << returnTransaction[j]->threadID << " rank: " << rank << " bank: " << bank <<" Address: " << hex << returnTransaction[j]->address << " Time: " << dec << currentClockCycle << '\n');
 							insertHistogram(currentClockCycle-pendingReadTransactions[i]->timeAdded,rank,bank);
 							//return latency
 							returnReadData(pendingReadTransactions[i]);
@@ -922,6 +924,7 @@ bool MemoryController::addTransaction(Transaction *trans)
 		{
 			trans->timeAdded = currentClockCycle;
 			transactionQueues[trans->threadID].push_back(trans);
+			//PRINTN("Transaction queue " << trans->threadID << " size " << transactionQueues[trans->threadID].size() << endl);
 			return true;
 		}
 		else 
