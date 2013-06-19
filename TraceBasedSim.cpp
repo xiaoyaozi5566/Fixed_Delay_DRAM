@@ -555,6 +555,9 @@ int main(int argc, char **argv)
 		exit(0);
 	}
 
+	ofstream inputFile;
+	inputFile.open("t0trace");
+	
 	for (size_t i=0;i<numCycles;i++)
 	{
 		if (!pendingTrans)
@@ -566,6 +569,7 @@ int main(int argc, char **argv)
 				if (line.size() > 0)
 				{
 					data = parseTraceFileLine(line, addr, transType,clockCycle, pid, traceType,useClockCycle);
+					if (pid == 0 && transType == DATA_READ) inputFile << "Address: " << hex << addr << " Arrive time: " << dec << clockCycle << '\n';
 					trans = new Transaction(transType, addr, data, pid, 0);
 					alignTransactionAddress(*trans); 
 
